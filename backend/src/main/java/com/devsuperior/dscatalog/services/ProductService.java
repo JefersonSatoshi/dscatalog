@@ -18,6 +18,7 @@ import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
 import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
+import com.devsuperior.dscatalog.services.exceptions.UnprocessableEntityException;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -87,12 +88,13 @@ public class ProductService {
 		
 		entity.getCategories().clear();
 		
-		for(CategoryDTO catDto : dto.getCategories()) {
-			if (!categoryRepository.existsById(catDto.getId())) {
-				throw new ResourceNotFoundException("Category ID not found: " + catDto.getId());
+		for (CategoryDTO catDto : dto.getCategories()) {
+			try {
+				Category cat = categoryRepository.getReferenceById(catDto.getId());
+				entity.getCategories().add(cat);
+			} catch (EntityNotFoundException e) {
+				throw new UnprocessableEntityException("Category ID not found: " + catDto.getId());
 			}
-			Category cat = categoryRepository.getReferenceById(catDto.getId());
-			entity.getCategories().add(cat);
 		}
 	}
 }

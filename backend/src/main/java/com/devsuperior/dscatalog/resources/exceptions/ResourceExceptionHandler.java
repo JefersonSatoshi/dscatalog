@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
+import com.devsuperior.dscatalog.services.exceptions.UnprocessableEntityException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -34,6 +35,18 @@ public class ResourceExceptionHandler {
 		err.setTimestamp(Instant.now());
 		err.setStatus(status.value());
 		err.setError("Database exception");
+		err.setMessage(e.getMessage());
+		err.setPath(request.getRequestURI());
+		return ResponseEntity.status(status).body(err);
+	}
+	
+	@ExceptionHandler(UnprocessableEntityException.class)
+	public ResponseEntity<StandardError> unprocessableEntity(UnprocessableEntityException e, HttpServletRequest request) {
+		HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+		StandardError err = new StandardError();
+		err.setTimestamp(Instant.now());
+		err.setStatus(status.value());
+		err.setError("Unprocessable entity");
 		err.setMessage(e.getMessage());
 		err.setPath(request.getRequestURI());
 		return ResponseEntity.status(status).body(err);
